@@ -32,7 +32,7 @@ export default {
     }
   },
   watch: {
-    mapleTypeSelected: () => {
+    mapleTypeSelected: function() {
       this.filterProductByMapleType();
     },
   },
