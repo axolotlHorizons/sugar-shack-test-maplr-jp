@@ -20,13 +20,12 @@ export default {
     },
     showDialog: function () {
       if (!this.showDialog) {
-        this.productDetail = {};
         this.$emit('onCloseCartPopup', false);
       }
-    },
-    idProduct: function () {
+      else {
         this.getInfoProduct();
-    }
+      }
+    },
   },
   computed: {
     fixedPrice() {

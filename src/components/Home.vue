@@ -3,6 +3,7 @@ import * as productsHandler from "../api/products-handler";
 import ProductCard from './ProductCard.vue';
 import ProductDetail from "./ProductDetail.vue";
 import * as utils from "../utils";
+import tinyEmitter from "tiny-emitter/instance";
 
 export default {
   components: {
@@ -16,6 +17,11 @@ export default {
       listItems: [...data]
     }
   },
+  mounted() {
+    tinyEmitter.on('orderConfirm', (orderDetail) => {
+      this.handleStockChange(orderDetail);
+    });
+  },
   data() {
     return {
       selectedProductId: "",
@@ -26,12 +32,8 @@ export default {
     }
   },
   watch: {
-    mapleTypeSelected: function () {
-      let tmpFiltered = [...this.listItems]
-      let tmpMapleType = this.mapleTypeSelected.map(index => {
-        return this.listMapleType[index];
-      });
-      this.filteredProductList = tmpFiltered.filter(value => tmpMapleType.includes(value.type));
+    mapleTypeSelected: () => {
+      this.filterProductByMapleType();
     },
   },
   methods: {
@@ -44,6 +46,23 @@ export default {
     },
     getMapleName(type) {
       return utils.getTypeOfMaple(type);
+    },
+    filterProductByMapleType() {
+      let tmpFiltered = [...this.listItems]
+      let tmpMapleType = this.mapleTypeSelected.map(index => {
+        return this.listMapleType[index];
+      });
+      this.filteredProductList = tmpFiltered.filter(value => tmpMapleType.includes(value.type));
+    },
+    handleStockChange(orderDetail) {
+      let tmpListItems = this.listItems.map(item => {
+        let orderItem = orderDetail.products.find(orderProduct => orderProduct.id === item.id) ?? null;
+        if (orderItem !== null) {
+          item.stock -= orderItem.qty;
+        }
+        return item;
+      });
+      this.listItems = [...tmpListItems];
     }
   }
 }

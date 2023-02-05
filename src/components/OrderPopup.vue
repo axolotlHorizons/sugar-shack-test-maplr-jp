@@ -2,6 +2,7 @@
 import { store } from '../store.js'
 import * as ordersHandler from "../api/orders-handler";
 import * as utils from "../utils";
+import tinyEmitter from "tiny-emitter/instance";
 
 export default {
   emits: ['onCloseOrderPopup'],
@@ -31,12 +32,12 @@ export default {
       }
     },
     cartOrder: function () {
-      this.orderDetails = {total: this.cartOrder.reduce((acc, current) => {return acc + (current.price * current.qty)}, 0).toFixed(2), products: [...this.cartOrder.map(value => value.id)]};
+      this.orderDetails = {
+        total: this.cartOrder.reduce((acc, current) => {return acc + (current.price * current.qty)}, 0).toFixed(2),
+        products: [...this.cartOrder.map(value => {return {id: value.id, qty: value.qty}})]
+      };
       this.orderDetails.totalTaxesInclude = utils.getPriceWithTaxe(this.orderDetails.total);
     },
-  },
-  computed: {
-
   },
   methods: {
     confirmCommand: function() {
@@ -46,6 +47,7 @@ export default {
         this.store.infoText = `Votre commande est validé !`;
         this.store.infoType = 'success';
         this.store.isInfo = true;
+        tinyEmitter.emit('orderConfirm', this.orderDetails);
       });
     }
   }
